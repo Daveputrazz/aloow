@@ -620,6 +620,7 @@
 <!-- LIGHTBOX -->
 <div class="lightbox" id="lightbox">
   <button class="lightbox-close" id="lightboxClose">&#10005;</button>
+  <img class="lb-main" src="" alt="" style="display:none; max-width:90vw; max-height:62vh; object-fit:contain; box-shadow:0 0 80px rgba(184,92,114,0.12);">
   <div class="lb-placeholder" id="lbPlaceholder">&#127800;</div>
   <p class="lightbox-caption" id="lbCaption"></p>
 </div>
@@ -938,6 +939,30 @@
   var lbClose = document.getElementById("lightboxClose");
   function openLightbox(idx) {
     lbCap.textContent = lbCaptions[idx] || "";
+
+    // Ambil foto dari polaroid yang diklik
+    var polaroidEl = document.querySelector('.polaroid[data-idx="' + idx + '"]');
+    var imgEl = polaroidEl ? polaroidEl.querySelector(".polaroid-img") : null;
+    var placeholder = document.getElementById("lbPlaceholder");
+
+    if (imgEl && imgEl.src && imgEl.naturalWidth > 0) {
+      // Kalau foto berhasil load, tampilkan foto
+      var lbImg = lb.querySelector("img.lb-main");
+      if (!lbImg) {
+        lbImg = document.createElement("img");
+        lbImg.className = "lb-main";
+        placeholder.parentNode.insertBefore(lbImg, placeholder);
+      }
+      lbImg.src = imgEl.src;
+      lbImg.style.display = "block";
+      placeholder.style.display = "none";
+    } else {
+      // Kalau foto belum ada, tampilkan placeholder bunga
+      var lbImg2 = lb.querySelector("img.lb-main");
+      if (lbImg2) lbImg2.style.display = "none";
+      placeholder.style.display = "flex";
+    }
+
     lb.classList.add("active");
     document.body.style.overflow = "hidden";
   }
