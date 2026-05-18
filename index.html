@@ -1253,45 +1253,57 @@
     })();
   }
 
-  /* ── AUDIO ── */
-  var audio        = document.getElementById("bgMusic");
-  var audioBtn     = document.getElementById("audioToggle");
-  var audioStarted = false;
+/* ── AUDIO ── */
+var audio        = document.getElementById("bgMusic");
+var audioBtn     = document.getElementById("audioToggle");
+var audioStarted = false;
 
-  function fadeInAudio() {
-    var vol = 0;
-    var iv = setInterval(function() {
-      vol += 0.005;
-      if (vol >= 0.38) { audio.volume = 0.38; clearInterval(iv); return; }
-      audio.volume = vol;
-    }, 100);
-  }
+function fadeInAudio() {
+  audio.volume = 0;
+  var vol = 0;
+  var iv = setInterval(function() {
+    vol += 0.008;
+    if (vol >= 0.38) { audio.volume = 0.38; clearInterval(iv); return; }
+    audio.volume = vol;
+  }, 80);
+}
 
-  function tryPlayAudio() {
-    if (audioStarted) return;
-    audio.volume = 0;
-    var promise = audio.play();
-    if (promise !== undefined) {
-      promise.then(function() {
-        audioStarted = true;
-        fadeInAudio();
-      }).catch(function() {});
+function tryPlayAudio() {
+  if (audioStarted) return;
+  audio.volume = 0;
+  audio.play().then(function() {
+    audioStarted = true;
+    audioBtn.classList.add("playing");
+    fadeInAudio();
+  }).catch(function() {});
+}
+
+// Trigger dari interaksi apapun
+["click","touchstart","scroll","keydown","mousemove","pointerdown"].forEach(function(evt) {
+  document.addEventListener(evt, tryPlayAudio, { once: true, passive: true });
+});
+
+// Coba autoplay langsung (works di beberapa browser)
+setTimeout(tryPlayAudio, 300);
+
+if (audioBtn) {
+  audioBtn.addEventListener("click", function(e) {
+    e.stopPropagation(); // jangan trigger tryPlayAudio
+    if (!audioStarted) {
+      tryPlayAudio();
+      return;
     }
-  }
-
-  if (audioBtn) {
-    audioBtn.addEventListener("click", function() {
-      if (!audioStarted) {
-        tryPlayAudio();
-      } else if (audio.paused) {
-        audio.play();
-        audioBtn.innerHTML = "&#9834;";
-      } else {
-        audio.pause();
-        audioBtn.innerHTML = "&#9835;";
-      }
-    });
-  }
+    if (audio.paused) {
+      audio.play();
+      audioBtn.innerHTML = "&#9834;";
+      audioBtn.classList.add("playing");
+    } else {
+      audio.pause();
+      audioBtn.innerHTML = "&#9835;";
+      audioBtn.classList.remove("playing");
+    }
+  });
+}
 
   document.addEventListener("click",  tryPlayAudio, { once: true });
   document.addEventListener("scroll", tryPlayAudio, { once: true });
